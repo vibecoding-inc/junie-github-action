@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach, afterEach, spyOn, mock } from "bun:test";
+import { describe, test, expect, beforeEach, afterEach, spyOn } from "bun:test";
 import * as github from "@actions/github";
 import { checkHumanActor } from "../src/github/validation/actor";
 import type { Octokit } from "@octokit/rest";
