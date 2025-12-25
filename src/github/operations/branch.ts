@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 
 import * as core from "@actions/core";
+import * as github from "@actions/github";
 import {$} from "bun";
 import {
     GitHubContext,
@@ -167,10 +168,12 @@ async function setupWorkingBranch(context: GitHubContext, octokit: Octokits): Pr
         console.log(`Base branch: ${baseBranch}`);
         console.log(`Target branch: ${sourceBranch}`);
 
+        // Use github.context.actor to get the actual workflow trigger, not context.actor
+        // which contains the commit author (JetBrains Junie)
         const useExistingBranch = shouldUseExistingPRBranch(
             context.inputs.silentMode,
             createNewBranchForPR,
-            context.actor,
+            github.context.actor,
             prAuthor,
             context.tokenOwner.login,
             state

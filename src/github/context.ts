@@ -16,7 +16,7 @@ import {
 } from "@octokit/webhooks-types";
 import type {TokenOwner} from "./operations/auth";
 import {OUTPUT_VARS} from "../constants/environment";
-import {DEFAULT_TRIGGER_PHRASE, RESOLVE_CONFLICTS_ACTION} from "../constants/github";
+import {DEFAULT_TRIGGER_PHRASE, JUNIE_COMMIT_AUTHOR, RESOLVE_CONFLICTS_ACTION} from "../constants/github";
 
 
 export type ScheduleEvent = {
@@ -113,8 +113,8 @@ export function parseGitHubContext(tokenOwner: TokenOwner): GitHubContext {
         runId: process.env.GITHUB_RUN_ID!,
         workflow: process.env.GITHUB_WORKFLOW || "Junie",
         eventAction: context.payload.action,
-        actor: context.actor,
-        actorEmail: getActorEmail(),
+        actor: JUNIE_COMMIT_AUTHOR.name,
+        actorEmail: JUNIE_COMMIT_AUTHOR.email,
         tokenOwner,
         inputs: {
             resolveConflicts: process.env.RESOLVE_CONFLICTS == "true",
@@ -332,10 +332,4 @@ export function isAutomationContext(
     return AUTOMATION_EVENT_NAMES.includes(
         context.eventName as AutomationEventName,
     );
-}
-
-function getActorEmail(): string {
-    const actor = github.context.actor;
-    const userId = github.context.payload.sender?.id;
-    return `${userId}+${actor}@users.noreply.github.com`;
 }

@@ -3,7 +3,7 @@ import {GitHubContext} from "../context";
 import {$} from "bun";
 import type {Octokits} from "../api/client";
 import type {GitHubTokenConfig} from "../token";
-import {GITHUB_ACTIONS_BOT} from "../../constants/github";
+import {GITHUB_ACTIONS_BOT, JUNIE_COMMIT_AUTHOR} from "../../constants/github";
 import {VIEWER_QUERY, type ViewerQueryResponse} from "../api/queries";
 
 interface GitUser {
@@ -130,36 +130,13 @@ export async function getTokenOwnerInfo(octokit: Octokits, tokenConfig: GitHubTo
 export async function gitAuth(parsedContext: GitHubContext, tokenConfig: GitHubTokenConfig) {
     console.log("Configuring git authentication...");
 
-    const serverUrl = new URL(GITHUB_SERVER_URL);
-    let gitUser: GitUser;
-    const tokenOwner = parsedContext.tokenOwner;
-
-    // Determine which credentials to use for git commits
-    // Bots/Apps should commit as themselves, not as the human actor
-    if (tokenOwner.type === "Bot") {
-        console.log(`Using token owner (bot) credentials for git authentication: ${tokenOwner.login}`);
-
-        // Generate GitHub noreply email address for bots
-        // Format: {id}+{login}@users.noreply.github.com
-        // Example: 41898282+github-actions[bot]@users.noreply.github.com
-        const noreplyDomain =
-            serverUrl.hostname === "github.com"
-                ? "users.noreply.github.com"
-                : `users.noreply.${serverUrl.hostname}`; // For GitHub Enterprise
-
-        const email = `${tokenOwner.id}+${tokenOwner.login}@${noreplyDomain}`;
-        gitUser = {
-            login: tokenOwner.login,
-            email: email,
-        };
-    } else {
-        // For human users with custom PATs, use their actual credentials
-        console.log("Using actor credentials for git authentication");
-        gitUser = {
-            login: parsedContext.actor,
-            email: parsedContext.actorEmail,
-        };
-    }
+    // Always use JetBrains Junie as the commit author
+    // This ensures consistent attribution regardless of who triggered the workflow
+    const gitUser: GitUser = {
+        login: JUNIE_COMMIT_AUTHOR.name,
+        email: JUNIE_COMMIT_AUTHOR.email,
+    };
+    console.log(`Using JetBrains Junie as commit author`);
 
     // Configure git user for commits (required for both default and custom tokens)
     try {
@@ -176,6 +153,7 @@ export async function gitAuth(parsedContext: GitHubContext, tokenConfig: GitHubT
         );
     }
 
+    const serverUrl = new URL(GITHUB_SERVER_URL);
     // Default token: actions/checkout already configured remote auth, skip remote URL setup
     if (tokenConfig.isDefaultToken()) {
         console.log("Using default token - remote authentication already configured by actions/checkout");

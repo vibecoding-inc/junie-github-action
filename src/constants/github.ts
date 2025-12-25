@@ -8,6 +8,11 @@ export const GITHUB_ACTIONS_BOT = {
     type: "Bot" as const,
 } as const;
 
+export const JUNIE_COMMIT_AUTHOR = {
+    name: "JetBrains Junie",
+    email: "junie-no-reply@jetbrains.com",
+} as const;
+
 // ============================================================================
 // Actions and Triggers
 // ============================================================================

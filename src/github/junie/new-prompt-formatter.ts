@@ -1,3 +1,4 @@
+import * as github from "@actions/github";
 import {
     FetchedData,
     GraphQLTimelineItemNode,
@@ -263,8 +264,11 @@ Owner: ${repo.owner.login}
     }
 
     private getActorInfo(context: GitHubContext) {
+        // Use github.context.actor to get the actual workflow trigger, not context.actor
+        // which contains the commit author (JetBrains Junie)
+        const triggerActor = github.context.actor;
         return `<actor>
-Triggered by: @${context.actor}
+Triggered by: @${triggerActor}
 Event: ${context.eventName}${context.eventAction ? ` (${context.eventAction})` : ""}
 </actor>`
     }
