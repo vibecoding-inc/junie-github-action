@@ -1,10 +1,23 @@
-import {describe, test, expect} from "bun:test";
+import {describe, test, expect, beforeEach, afterEach} from "bun:test";
+import * as github from "@actions/github";
 import {NewGitHubPromptFormatter} from "./new-prompt-formatter";
 import {GitHubContext} from "../context";
 import {FetchedData, GraphQLPullRequest, GraphQLIssue} from "../api/queries";
 
 describe("NewGitHubPromptFormatter", () => {
     const formatter = new NewGitHubPromptFormatter();
+    let originalActor: string;
+    
+    beforeEach(() => {
+        // Save original actor and set test actor
+        originalActor = github.context.actor;
+        (github.context as any).actor = "test-user";
+    });
+    
+    afterEach(() => {
+        // Restore original actor
+        (github.context as any).actor = originalActor;
+    });
 
     const createMockContext = (overrides: Partial<GitHubContext> = {}): GitHubContext => ({
         runId: "123",

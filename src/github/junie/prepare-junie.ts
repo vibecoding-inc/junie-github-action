@@ -74,7 +74,7 @@ async function shouldHandle(context: GitHubContext, octokit: Octokits): Promise<
         return await shouldResolveConflicts(context, octokit)
     }
 
-    return isEntityContext(context) && checkContainsTrigger(context) && checkHumanActor(octokit.rest, context);
+    return isEntityContext(context) && checkContainsTrigger(context) && checkHumanActor(octokit.rest);
 }
 
 
